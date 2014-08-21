@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Identity.Dapper", "Identity.Dapper\Identity.Dapper.csproj", "{CE5D76C0-F48F-48AA-8567-25A9CC68C6DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Identity.Dapper.IntegrationTests", "Identity.Dapper.IntegrationTests\Identity.Dapper.IntegrationTests.csproj", "{7029CC9B-CB20-48AB-98A4-C4B1BE8359BE}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Identity.SqlServer", "Identity.SqlServer\Identity.SqlServer.sqlproj", "{8C914E67-36A9-43E2-BF7D-7AB76F2CEDA0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CE5D76C0-F48F-48AA-8567-25A9CC68C6DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE5D76C0-F48F-48AA-8567-25A9CC68C6DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE5D76C0-F48F-48AA-8567-25A9CC68C6DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE5D76C0-F48F-48AA-8567-25A9CC68C6DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7029CC9B-CB20-48AB-98A4-C4B1BE8359BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7029CC9B-CB20-48AB-98A4-C4B1BE8359BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7029CC9B-CB20-48AB-98A4-C4B1BE8359BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7029CC9B-CB20-48AB-98A4-C4B1BE8359BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C914E67-36A9-43E2-BF7D-7AB76F2CEDA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C914E67-36A9-43E2-BF7D-7AB76F2CEDA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C914E67-36A9-43E2-BF7D-7AB76F2CEDA0}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{8C914E67-36A9-43E2-BF7D-7AB76F2CEDA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C914E67-36A9-43E2-BF7D-7AB76F2CEDA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C914E67-36A9-43E2-BF7D-7AB76F2CEDA0}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
