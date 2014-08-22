@@ -10,5 +10,5 @@ Please note that the tests wipe the tables they have run against after a test ha
 Create a database and use schema compare from the database project to add the tables.
 
 ####Model Changes
-The boolean properties use a Is prefix
+The boolean properties use an Is prefix
 EmailConfirmed is IsEmailConfirmed. This is also reflected in the database fields.
