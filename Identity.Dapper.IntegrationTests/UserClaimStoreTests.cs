@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace Identity.Dapper.IntegrationTests
 {
     [TestFixture]
-    public class UserClaimTests
+    public class UserClaimStoreTests
     {
         [Test]
         public async void AddClaimAsync_GivenAUserAndClaim_AddsTheClaim()

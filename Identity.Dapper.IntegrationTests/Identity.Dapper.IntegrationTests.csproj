@@ -56,7 +56,7 @@
   <ItemGroup>
     <Compile Include="Database.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserClaimTests.cs" />
+    <Compile Include="UserClaimStoreTests.cs" />
     <Compile Include="UserEmailStoreTests.cs" />
     <Compile Include="UserLockoutStoreTests.cs" />
     <Compile Include="UserPasswordStoreTests.cs" />
