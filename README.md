@@ -4,7 +4,7 @@ Identity
 Implementation of ASP.NET Identity using Dapper
 
 Integration Tests
-=================
+-----------------
 Please note that the tests wipe the tables they have run against after a test has completed.
 
 Database Set Up
