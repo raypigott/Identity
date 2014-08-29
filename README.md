@@ -7,8 +7,8 @@ Implementation of ASP.NET Identity using Dapper
 Please note that the tests wipe the tables they have run against after a test has completed.
 
 ####Database Set Up
-If using Visual Studio:
-Create a database and use schema compare from the database project to add the tables.
+If using Visual Studio, create a database and use schema compare from the database project to add the tables.
+Othewise you can run the scripts in the database project.
 
 ####Model Changes
 The boolean properties use an Is prefix
