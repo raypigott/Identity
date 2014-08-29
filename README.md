@@ -1,7 +1,7 @@
 Identity
 ========
 
-Implementation of ASP.NET Identity using Dapper
+Implementation of ASP.NET Identity using Dapper for SQL Server
 
 ####Integration Tests
 Please note that the tests wipe the tables they have run against after a test has completed.
