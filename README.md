@@ -7,7 +7,7 @@ Implementation of ASP.NET Identity using Dapper for SQL Server
 Please note that the tests wipe the tables they have run against after a test has completed.
 
 ####Database Set Up
-If using Visual Studio, use the dacpac created when the project is built.
+If using Visual Studio, use the dacpac created when the project is built (Identity\Identity.SqlServer\bin\Debug\Identity.SqlServer.dacpac)
 Instructions are here:http://msdn.microsoft.com/en-us/library/ee210569.aspx
 Othewise you can run the scripts in the database project. The database needs to be called Identity.SqlServer to run the integration tests out of the box.
 
