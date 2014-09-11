@@ -5,12 +5,12 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Dapper;
-using Identity.Dapper.Entities;
 using Identity.Dapper.ExtensionMethods;
+using Identity.Dapper.Models;
 using Identity.Dapper.TsqlQueries;
 using Microsoft.AspNet.Identity;
 
-namespace Identity.Dapper
+namespace Identity.Dapper.Stores
 {
     /// <summary>
     /// Responsible for the persistance of a user. Uses an int primary key.
@@ -25,7 +25,8 @@ namespace Identity.Dapper
         IUserEmailStore<TUser, int>, 
         IUserPhoneNumberStore<TUser, int>,
         IUserTwoFactorStore<TUser, int>,
-        IUserLockoutStore<TUser, int> where TUser : UserEntity
+        IUserLockoutStore<TUser, int>,
+        IUserLoginStore<TUser, int> where TUser : User
     {
         private const string UserArgumentNullExceptionMessage = "User cannot be null";
 
@@ -43,6 +44,8 @@ namespace Identity.Dapper
 
         private const string PhoneNumberNullExceptionMessage = "Phone number cannot be null or empty";
 
+        private const string UserLoginInfoArgumentNullExceptionMessage = "User login info cannot be null or empty";
+
         private readonly IApplicationDatabaseConfiguration applicationDatabaseConfiguration;
 
         public UserStore(IApplicationDatabaseConfiguration applicationDatabaseConfiguration)
@@ -58,11 +61,11 @@ namespace Identity.Dapper
         {
             if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
 
-            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.Get()))
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
             {
                 await sqlConnection.OpenAsync();
 
-                var userId = await sqlConnection.QueryAsync<int>(UserEntityTsql.Insert, user);
+                var userId = await sqlConnection.QueryAsync<int>(UserTsql.Insert, user);
                 user.Id = userId.Single();
             }
         }
@@ -75,9 +78,9 @@ namespace Identity.Dapper
         {
             if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
 
-            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.Get()))
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
             {
-                sqlConnection.Execute(UserEntityTsql.Update, user);
+                sqlConnection.Execute(UserTsql.Update, user);
             }
 
             return Task.FromResult(0);
@@ -118,11 +121,11 @@ namespace Identity.Dapper
         /// <returns>The user or null</returns>
         public async Task<TUser> FindByIdAsync(int userId)
         {
-            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.Get()))
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
             {
                 await sqlConnection.OpenAsync();
 
-                var user = await sqlConnection.QueryAsync<TUser>(UserEntityTsql.FindByIdAsync, new { Id = userId });
+                var user = await sqlConnection.QueryAsync<TUser>(UserTsql.FindByIdAsync, new { Id = userId });
                 return user.SingleOrDefault();
             }
         }
@@ -136,11 +139,11 @@ namespace Identity.Dapper
         {
             if (userName == null) throw new ArgumentNullException(UserNameArgumentNullExceptionMessage);
 
-            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.Get()))
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
             {
                 await sqlConnection.OpenAsync();
 
-                var user = await sqlConnection.QueryAsync<TUser>(UserEntityTsql.FindByNameAsync, new { UserName = userName });
+                var user = await sqlConnection.QueryAsync<TUser>(UserTsql.FindByNameAsync, new { UserName = userName });
                 return user.FirstOrDefault();
             }
         }
@@ -161,15 +164,15 @@ namespace Identity.Dapper
 
             var claimsIdentity = new ClaimsIdentity();
 
-            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.Get()))
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
             {
                 await sqlConnection.OpenAsync();
 
-                var claims = await sqlConnection.QueryAsync<UserClaimEntity>(UserClaimEntityTsql.GetClaimsAsync, new { userId = user.Id });
+                var claims = await sqlConnection.QueryAsync<UserClaim>(UserClaimTsql.GetClaimsAsync, new { userId = user.Id });
 
-                foreach (var userClaimEntity in claims)
+                foreach (var userClaim in claims)
                 {
-                    var claim = new Claim(userClaimEntity.ClaimType, userClaimEntity.ClaimValue);
+                    var claim = new Claim(userClaim.ClaimType, userClaim.ClaimValue);
                     claimsIdentity.AddClaim(claim);
                 }
 
@@ -184,7 +187,7 @@ namespace Identity.Dapper
         /// <param name="claim">The claim</param>
         public Task AddClaimAsync(TUser user, Claim claim)
         {
-            ExecuteClaimQuery(user, claim, UserClaimEntityTsql.AddClaimAsync);
+            ExecuteClaimQuery(user, claim, UserClaimTsql.AddClaimAsync);
 
             return Task.FromResult(0);
         }
@@ -196,13 +199,13 @@ namespace Identity.Dapper
         /// <param name="claim">The claim</param>
         public Task RemoveClaimAsync(TUser user, Claim claim)
         {
-            ExecuteClaimQuery(user, claim, UserClaimEntityTsql.RemoveClaimAsync);
+            ExecuteClaimQuery(user, claim, UserClaimTsql.RemoveClaimAsync);
 
             return Task.FromResult(0);
         }
 
         /// <summary>
-        /// Executes a query using a <see cref="UserClaimEntity"/> as parameters
+        /// Executes a query using a <see cref="UserClaim"/> as parameters
         /// </summary>
         /// <param name="user">The user model</param>
         /// <param name="claim">The claim</param>
@@ -213,18 +216,18 @@ namespace Identity.Dapper
 
             if (claim == null) throw new ArgumentNullException(ClaimArgumentNullExceptionMessage);
 
-            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.Get()))
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
             {
                 await sqlConnection.OpenAsync();
 
-                var userClaimEntity = new UserClaimEntity
+                var userClaim = new UserClaim
                 {
                     UserId = user.Id,
                     ClaimType = claim.Type,
                     ClaimValue = claim.Value
                 };
 
-                sqlConnection.Execute(tsql, userClaimEntity);
+                sqlConnection.Execute(tsql, userClaim);
             }
         }
 
@@ -239,7 +242,7 @@ namespace Identity.Dapper
 
             if (roleName.IsNullOrEmpty()) throw new ArgumentNullException(RoleNameArgumentNullExceptionMessage);
 
-            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.Get()))
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
             {
                 await sqlConnection.OpenAsync();
 
@@ -247,13 +250,13 @@ namespace Identity.Dapper
 
                 if (roleId != null)
                 {
-                    var userRoleEntity = new UserRoleEntity
+                    var userRole = new UserRole
                     {
                         RoleId = roleId.Value,
                         UserId = user.Id
                     };
 
-                    sqlConnection.Execute(UserRoleEntityTsql.Insert, userRoleEntity);
+                    sqlConnection.Execute(UserRoleTsql.Insert, userRole);
                 }
             }
         }
@@ -267,17 +270,17 @@ namespace Identity.Dapper
         {
             if (roleName.IsNullOrEmpty()) throw new ArgumentNullException(RoleNameArgumentNullExceptionMessage);
 
-            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.Get()))
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
             {
                 await sqlConnection.OpenAsync();
 
-                var roleEntities = await sqlConnection.QueryAsync<RoleEntity>(RoleEntityTsql.GetRole, new { name = roleName });
+                var roleEntities = await sqlConnection.QueryAsync<Role>(RoleTsql.GetRole, new { name = roleName });
 
-                var roleEntity = roleEntities.FirstOrDefault();
+                var role = roleEntities.FirstOrDefault();
 
-                if (roleEntity != null)
+                if (role != null)
                 {
-                    return roleEntity.Id;
+                    return role.Id;
                 }
 
                 return null;
@@ -295,7 +298,7 @@ namespace Identity.Dapper
 
             if (roleName.IsNullOrEmpty()) throw new ArgumentNullException(RoleNameArgumentNullExceptionMessage);
 
-            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.Get()))
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
             {
                 await sqlConnection.OpenAsync();
 
@@ -303,13 +306,13 @@ namespace Identity.Dapper
 
                 if (roleId != null)
                 {
-                    var userRoleEntity = new UserRoleEntity
+                    var userRole = new UserRole
                     {
                         RoleId = roleId.Value,
                         UserId = user.Id
                     };
 
-                    sqlConnection.Execute(UserRoleEntityTsql.Delete, userRoleEntity);
+                    sqlConnection.Execute(UserRoleTsql.Delete, userRole);
                 }
             }
         }
@@ -323,11 +326,11 @@ namespace Identity.Dapper
         {
             if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
 
-            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.Get()))
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
             {
                 await sqlConnection.OpenAsync();
 
-                var roles = await sqlConnection.QueryAsync<string>(UserRoleEntityTsql.GetUserRoles, new { userId = user.Id });
+                var roles = await sqlConnection.QueryAsync<string>(UserRoleTsql.GetUserRoles, new { userId = user.Id });
 
                 return roles.ToList();
             }
@@ -377,9 +380,9 @@ namespace Identity.Dapper
         {
             if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
 
-            var userEntity = await FindByIdAsync(user.Id);
+            var foundUser = await FindByIdAsync(user.Id);
 
-            return userEntity.PasswordHash;
+            return foundUser.PasswordHash;
         }
 
         /// <summary>
@@ -391,9 +394,9 @@ namespace Identity.Dapper
         {
             if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
 
-            var userEntity = await FindByIdAsync(user.Id);
+            var foundUser = await FindByIdAsync(user.Id);
 
-            return userEntity.PasswordHash.IsNotNullOrEmpty();
+            return foundUser.PasswordHash.IsNotNullOrEmpty();
         }
 
         /// <summary>
@@ -423,9 +426,9 @@ namespace Identity.Dapper
         {
             if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
 
-            var userEntity = await FindByIdAsync(user.Id);
+            var foundUser = await FindByIdAsync(user.Id);
 
-            return userEntity.SecurityStamp;
+            return foundUser.SecurityStamp;
         }
 
         /// <summary>
@@ -434,11 +437,11 @@ namespace Identity.Dapper
         /// <returns>Users</returns>
         private IQueryable<TUser> GetUsers()
         {
-            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.Get()))
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
             {
                 sqlConnection.Open();
 
-                var users = sqlConnection.Query<TUser>(UserEntityTsql.Select);
+                var users = sqlConnection.Query<TUser>(UserTsql.Select);
                 return  users.AsQueryable();
             }
         }        
@@ -479,8 +482,8 @@ namespace Identity.Dapper
         {
             if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
 
-            var userEntity = await FindByIdAsync(user.Id);
-            return userEntity.Email;
+            var foundUser = await FindByIdAsync(user.Id);
+            return foundUser.Email;
         }
 
         /// <summary>
@@ -492,8 +495,8 @@ namespace Identity.Dapper
         {
             if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
 
-            var userEntity = await FindByIdAsync(user.Id);
-            return userEntity.IsEmailConfirmed;
+            var foundUser = await FindByIdAsync(user.Id);
+            return foundUser.IsEmailConfirmed;
         }
 
         /// <summary>
@@ -518,11 +521,11 @@ namespace Identity.Dapper
         {
             if (email.IsNullOrEmpty()) throw new ArgumentNullException(EmailNullExceptionMessage);
 
-            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.Get()))
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
             {
                 await sqlConnection.OpenAsync();
 
-                var user = await sqlConnection.QueryAsync<TUser>(UserEntityTsql.FindByEmailAsync, new { Email = email });
+                var user = await sqlConnection.QueryAsync<TUser>(UserTsql.FindByEmailAsync, new { Email = email });
                 return user.FirstOrDefault();
             }
         }
@@ -551,8 +554,8 @@ namespace Identity.Dapper
         {
             if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
 
-            var userEntity = await FindByIdAsync(user.Id);
-            return userEntity.PhoneNumber;
+            var foundUser = await FindByIdAsync(user.Id);
+            return foundUser.PhoneNumber;
         }
 
         /// <summary>
@@ -564,8 +567,8 @@ namespace Identity.Dapper
         {
             if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
 
-            var userEntity = await FindByIdAsync(user.Id);
-            return userEntity.IsPhoneNumberConfirmed;
+            var foundUser = await FindByIdAsync(user.Id);
+            return foundUser.IsPhoneNumberConfirmed;
         }
 
         /// <summary>
@@ -603,8 +606,8 @@ namespace Identity.Dapper
         {
             if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
 
-            var userEntity = await FindByIdAsync(user.Id);
-            return userEntity.IsTwoFactorEnabled;
+            var foundUser = await FindByIdAsync(user.Id);
+            return foundUser.IsTwoFactorEnabled;
         }
 
         /// <summary>
@@ -616,9 +619,9 @@ namespace Identity.Dapper
         {
             if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
 
-            var userEntity = await FindByIdAsync(user.Id);
+            var foundUser = await FindByIdAsync(user.Id);
 
-            return userEntity.LockoutEndDateUtc.HasValue ? new DateTimeOffset(DateTime.SpecifyKind(userEntity.LockoutEndDateUtc.Value, DateTimeKind.Utc)) : new DateTimeOffset(); 
+            return foundUser.LockoutEndDateUtc.HasValue ? new DateTimeOffset(DateTime.SpecifyKind(foundUser.LockoutEndDateUtc.Value, DateTimeKind.Utc)) : new DateTimeOffset(); 
         }
 
         /// <summary>
@@ -670,8 +673,8 @@ namespace Identity.Dapper
         {
             if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
 
-            var userEntity = await FindByIdAsync(user.Id);
-            return userEntity.AccessFailedCount;
+            var foundUser = await FindByIdAsync(user.Id);
+            return foundUser.AccessFailedCount;
         }
 
         /// <summary>
@@ -683,8 +686,8 @@ namespace Identity.Dapper
         {
             if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
 
-            var userEntity = await FindByIdAsync(user.Id);
-            return userEntity.IsLockoutEnabled;
+            var foundUser = await FindByIdAsync(user.Id);
+            return foundUser.IsLockoutEnabled;
         }
 
         /// <summary>
@@ -698,6 +701,98 @@ namespace Identity.Dapper
 
             user.IsLockoutEnabled = enabled;
             await UpdateAsync(user);
+        }
+
+        /// <summary>
+        /// Add a user login
+        /// </summary>
+        /// <param name="user">The user model</param>
+        /// <param name="userLoginInfo">The new login to add</param>
+        public async Task AddLoginAsync(TUser user, UserLoginInfo userLoginInfo)
+        {
+            if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
+
+            if (userLoginInfo == null) throw new ArgumentNullException(UserLoginInfoArgumentNullExceptionMessage);
+
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
+            {
+                await sqlConnection.OpenAsync();
+
+                var userLogin = new UserLogin
+                {
+                    LoginProvider = userLoginInfo.LoginProvider,
+                    ProviderKey = userLoginInfo.ProviderKey,
+                    UserId = user.Id
+                };
+
+                var userLoginId = await sqlConnection.QueryAsync<int>(UserLoginTsql.Insert, userLogin);
+            }
+        }
+
+        /// <summary>
+        /// Remove a user's login
+        /// </summary>
+        /// <param name="user">The user model</param>
+        /// <param name="userLoginInfo">The login to remove</param>
+        public async Task RemoveLoginAsync(TUser user, UserLoginInfo userLoginInfo)
+        {
+            if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
+
+            if (userLoginInfo == null) throw new ArgumentNullException(UserLoginInfoArgumentNullExceptionMessage);
+
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
+            {
+                await sqlConnection.OpenAsync();
+
+                var userLogin = new UserLogin
+                {
+                    LoginProvider = userLoginInfo.LoginProvider,
+                    ProviderKey = userLoginInfo.ProviderKey,
+                    UserId = user.Id
+                };
+
+                sqlConnection.Execute(UserLoginTsql.Delete, userLogin);
+            }
+        }
+
+        /// <summary>
+        /// Get all the logins for a user
+        /// </summary>
+        /// <param name="user">The user model</param>
+        /// <returns>A list of a user's logins</returns>
+        public async Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user)
+        {
+            if (user == null) throw new ArgumentNullException(UserArgumentNullExceptionMessage);
+
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
+            {
+                await sqlConnection.OpenAsync();
+
+                var logins = await sqlConnection.QueryAsync<UserLoginInfo>(UserLoginTsql.GetLogins, new { userId = user.Id });
+
+                return logins.ToList();
+            }
+        }
+
+        /// <summary>
+        /// Find a user from a login
+        /// </summary>
+        /// <param name="userLoginInfo">The login</param>
+        /// <returns>The user model</returns>
+        public async Task<TUser> FindAsync(UserLoginInfo userLoginInfo)
+        {
+            if (userLoginInfo == null) throw new ArgumentNullException(UserLoginInfoArgumentNullExceptionMessage);
+
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
+            {
+                await sqlConnection.OpenAsync();
+
+                var userId = await sqlConnection.QueryAsync<int>(UserLoginTsql.GetUserId, userLoginInfo);
+
+                if (userId == null) return null;
+
+                return await FindByIdAsync(userId.FirstOrDefault());
+            }
         }
     }
 }

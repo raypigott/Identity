@@ -1,6 +1,6 @@
 ﻿namespace Identity.Dapper.TsqlQueries
 {
-    public class RoleEntityTsql
+    public class RoleTsql
     {
         public static string GetRole = @"SELECT [Id], [Name] FROM [identity].[Role] WHERE Name = @Name";
 

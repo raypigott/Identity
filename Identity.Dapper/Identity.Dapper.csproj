@@ -70,20 +70,21 @@
     <Compile Include="ApplicationConfiguration.cs" />
     <Compile Include="ApplicationDatabaseConfiguration.cs" />
     <Compile Include="ApplicationUserManager.cs" />
-    <Compile Include="Entities\RoleEntity.cs" />
-    <Compile Include="Entities\UserClaimEntity.cs" />
-    <Compile Include="Entities\UserEntity.cs" />
-    <Compile Include="Entities\UserLoginEntity.cs" />
-    <Compile Include="Entities\UserRoleEntity.cs" />
+    <Compile Include="Models\Role.cs" />
+    <Compile Include="Models\UserClaim.cs" />
+    <Compile Include="Models\User.cs" />
+    <Compile Include="Models\UserLogin.cs" />
+    <Compile Include="Models\UserRole.cs" />
     <Compile Include="ExtensionMethods\StringExtensionMethods.cs" />
     <Compile Include="IApplicationDatabaseConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RoleEntityStore.cs" />
-    <Compile Include="TsqlQueries\RoleEntityTsql.cs" />
-    <Compile Include="TsqlQueries\UserClaimEntityTsql.cs" />
-    <Compile Include="TsqlQueries\UserEntityTsql.cs" />
-    <Compile Include="TsqlQueries\UserRoleEntityTsql.cs" />
-    <Compile Include="UserStore.cs" />
+    <Compile Include="Stores\RoleStore.cs" />
+    <Compile Include="TsqlQueries\RoleTsql.cs" />
+    <Compile Include="TsqlQueries\UserClaimTsql.cs" />
+    <Compile Include="TsqlQueries\UserLoginTsql.cs" />
+    <Compile Include="TsqlQueries\UserTsql.cs" />
+    <Compile Include="TsqlQueries\UserRoleTsql.cs" />
+    <Compile Include="Stores\UserStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

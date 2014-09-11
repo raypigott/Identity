@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
 using FluentAssertions;
-using Identity.Dapper.Entities;
+using Identity.Dapper.Models;
+using Identity.Dapper.Stores;
 using NUnit.Framework;
 
 namespace Identity.Dapper.IntegrationTests
@@ -13,9 +14,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void AddClaimAsync_GivenAUserAndClaim_AddsTheClaim()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -30,13 +31,13 @@ namespace Identity.Dapper.IntegrationTests
                 IsAccountActive = true
             };
 
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            var insertedUser = await userStore.FindByIdAsync(userEntity.Id);
+            var insertedUser = await userStore.FindByIdAsync(user.Id);
 
             await userStore.AddClaimAsync(insertedUser, new Claim("ClaimType", "ClaimValue"));
 
-            IList<Claim> claims = await userStore.GetClaimsAsync(userEntity);
+            IList<Claim> claims = await userStore.GetClaimsAsync(user);
 
             claims.Should().HaveCount(1);
         }
@@ -45,9 +46,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void RemoveClaimAsync_GivenAUserAndClaim_RemovesTheClaim()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -62,15 +63,15 @@ namespace Identity.Dapper.IntegrationTests
                 IsAccountActive = true
             };
 
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            var insertedUser = await userStore.FindByIdAsync(userEntity.Id);
+            var insertedUser = await userStore.FindByIdAsync(user.Id);
 
             await userStore.AddClaimAsync(insertedUser, new Claim("ClaimType2", "ClaimValue2"));
 
             await userStore.RemoveClaimAsync(insertedUser, new Claim("ClaimType2", "ClaimValue2"));
 
-            IList<Claim> claims = await userStore.GetClaimsAsync(userEntity);
+            IList<Claim> claims = await userStore.GetClaimsAsync(user);
 
             claims.Should().HaveCount(0);
         }

@@ -1,6 +1,6 @@
 ﻿namespace Identity.Dapper.TsqlQueries
 {
-    public class UserEntityTsql
+    public class UserTsql
     {
         public static string Insert = @"INSERT INTO [identity].[User]
            ([Email]

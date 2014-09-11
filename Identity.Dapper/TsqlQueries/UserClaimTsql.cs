@@ -1,6 +1,6 @@
 ﻿namespace Identity.Dapper.TsqlQueries
 {
-    public class UserClaimEntityTsql
+    public class UserClaimTsql
     {
         public static string GetClaimsAsync = @"SELECT [Id]
           ,[UserId]

@@ -1,6 +1,6 @@
-﻿namespace Identity.Dapper.Entities
+﻿namespace Identity.Dapper.Models
 {
-    public class UserRoleEntity
+    public class UserRole
     {
         public int Id { get; set; }
         public int UserId { get; set; }

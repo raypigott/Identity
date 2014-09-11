@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
-using Identity.Dapper.Entities;
+using Identity.Dapper.Models;
+using Identity.Dapper.Stores;
 using NUnit.Framework;
 
 namespace Identity.Dapper.IntegrationTests
@@ -11,9 +12,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void SetPasswordHashAsync_GivenAUserAndPasswordHash_SetsTheHashForTheUser()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -28,11 +29,11 @@ namespace Identity.Dapper.IntegrationTests
                 IsAccountActive = true
             };
 
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            await userStore.SetPasswordHashAsync(userEntity, "1234");
+            await userStore.SetPasswordHashAsync(user, "1234");
 
-            var passwordHash = await userStore.GetPasswordHashAsync(userEntity);
+            var passwordHash = await userStore.GetPasswordHashAsync(user);
 
             passwordHash.Should().Be("1234");
         }
@@ -41,9 +42,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void HasPasswordAsync_GivenAUserWithAPasswordHash_ReturnsTrue()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -58,9 +59,9 @@ namespace Identity.Dapper.IntegrationTests
                 IsAccountActive = true
             };
 
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            var hasPasswordHash = await userStore.HasPasswordAsync(userEntity);
+            var hasPasswordHash = await userStore.HasPasswordAsync(user);
 
             hasPasswordHash.Should().BeTrue();
         }

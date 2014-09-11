@@ -11,7 +11,7 @@ namespace Identity.Dapper.IntegrationTests
         public static void TruncateAllTables()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.Get()))
+            using (var sqlConnection = new SqlConnection(applicationDatabaseConfiguration.GetConnectionString()))
             {
                 sqlConnection.Open();
 

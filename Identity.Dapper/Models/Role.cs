@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNet.Identity;
 
-namespace Identity.Dapper.Entities
+namespace Identity.Dapper.Models
 {
-    public class RoleEntity : IRole<int>
+    public class Role : IRole<int>
     {
         public int Id { get; set; }
         public string Name { get; set; }

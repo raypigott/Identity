@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
-using Identity.Dapper.Entities;
+using Identity.Dapper.Models;
+using Identity.Dapper.Stores;
 using NUnit.Framework;
 
 namespace Identity.Dapper.IntegrationTests
@@ -11,9 +12,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void SetTwoFactorEnabledAsync_GivenAUserAndATrueFlag_TwoFactorIsEnabled()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -27,11 +28,11 @@ namespace Identity.Dapper.IntegrationTests
                 UserName = "UserName",
                 IsAccountActive = true
             };
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            await userStore.SetTwoFactorEnabledAsync(userEntity, true);
+            await userStore.SetTwoFactorEnabledAsync(user, true);
 
-            var isTwoFactorEnabled = await userStore.GetTwoFactorEnabledAsync(userEntity);
+            var isTwoFactorEnabled = await userStore.GetTwoFactorEnabledAsync(user);
 
             isTwoFactorEnabled.Should().BeTrue();
         }

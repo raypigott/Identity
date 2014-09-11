@@ -59,6 +59,7 @@
     <Compile Include="UserClaimStoreTests.cs" />
     <Compile Include="UserEmailStoreTests.cs" />
     <Compile Include="UserLockoutStoreTests.cs" />
+    <Compile Include="UserLoginStoreTests.cs" />
     <Compile Include="UserPasswordStoreTests.cs" />
     <Compile Include="UserPhoneNumberStore.cs" />
     <Compile Include="UserRoleTests.cs" />

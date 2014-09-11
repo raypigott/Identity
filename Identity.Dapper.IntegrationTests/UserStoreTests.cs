@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
-using Identity.Dapper.Entities;
+using Identity.Dapper.Models;
+using Identity.Dapper.Stores;
 using NUnit.Framework;
 
 namespace Identity.Dapper.IntegrationTests
@@ -11,9 +12,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void CreateAsync_GivenNewUser_CreatesNewUserAndAssignsUserId()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -28,9 +29,9 @@ namespace Identity.Dapper.IntegrationTests
                 IsAccountActive = true
             };
 
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            var insertedUser = await userStore.FindByIdAsync(userEntity.Id);
+            var insertedUser = await userStore.FindByIdAsync(user.Id);
 
             insertedUser.Should().NotBeNull();
             insertedUser.Email.Should().Be("someemail@domain.com");
@@ -40,9 +41,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void UpdateAsync_GivenAnUpdate_UpdatesTheUser()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -57,7 +58,7 @@ namespace Identity.Dapper.IntegrationTests
                 IsAccountActive = true
             };
 
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
             var existingUser = await userStore.FindByNameAsync("UserName");
             existingUser.Email = "user@domain.com";
@@ -76,7 +77,7 @@ namespace Identity.Dapper.IntegrationTests
         public async void DeleteAsync_GivenAnExistingUser_UpdatesTheAccountToInActive()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
             var existingUser = await userStore.FindByNameAsync("UserName");
             existingUser.UserName = "HideMe";
@@ -91,9 +92,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void Users_GivenAUserStore_ReturnsAllActiveUsers()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -108,7 +109,7 @@ namespace Identity.Dapper.IntegrationTests
                 IsAccountActive = true
             };
 
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
             var users = userStore.Users;
             users.Should().NotBeNullOrEmpty();

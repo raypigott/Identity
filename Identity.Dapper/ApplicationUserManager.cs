@@ -1,13 +1,14 @@
-﻿using Identity.Dapper.Entities;
+﻿using Identity.Dapper.Models;
+using Identity.Dapper.Stores;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 
 namespace Identity.Dapper
 {
-    public class ApplicationUserManager : UserManager<UserEntity, int> 
+    public class ApplicationUserManager : UserManager<User, int> 
     {
-        public ApplicationUserManager(IUserStore<UserEntity, int> store)
+        public ApplicationUserManager(IUserStore<User, int> store)
             : base(store)
         {
 
@@ -16,9 +17,9 @@ namespace Identity.Dapper
         public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context)
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var manager = new ApplicationUserManager(new UserStore<UserEntity>(applicationDatabaseConfiguration));
+            var manager = new ApplicationUserManager(new UserStore<User>(applicationDatabaseConfiguration));
             
-            manager.UserValidator = new UserValidator<UserEntity, int>(manager)
+            manager.UserValidator = new UserValidator<User, int>(manager)
             {
                 AllowOnlyAlphanumericUserNames = false,
                 RequireUniqueEmail = true
@@ -31,7 +32,7 @@ namespace Identity.Dapper
             var dataProtectionProvider = options.DataProtectionProvider;
             if (dataProtectionProvider != null)
             {
-                manager.UserTokenProvider = new DataProtectorTokenProvider<UserEntity, int>(dataProtectionProvider.Create("PasswordReset"));
+                manager.UserTokenProvider = new DataProtectorTokenProvider<User, int>(dataProtectionProvider.Create("PasswordReset"));
             }
             return manager;
         }

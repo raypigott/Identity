@@ -2,7 +2,7 @@
 {
     public class ApplicationDatabaseConfiguration : IApplicationDatabaseConfiguration
     {
-        public string Get()
+        public string GetConnectionString()
         {
             return ApplicationConfiguration.ConnectionString;
         }

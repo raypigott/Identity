@@ -1,6 +1,6 @@
-﻿namespace Identity.Dapper.Entities
+﻿namespace Identity.Dapper.Models
 {
-    public class UserLoginEntity
+    public class UserLogin
     {
         public int Id { get; set; }
         public string LoginProvider { get; set; }

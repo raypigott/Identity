@@ -1,6 +1,7 @@
 ﻿using System;
 using FluentAssertions;
-using Identity.Dapper.Entities;
+using Identity.Dapper.Models;
+using Identity.Dapper.Stores;
 using NUnit.Framework;
 
 namespace Identity.Dapper.IntegrationTests
@@ -12,9 +13,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void SetLockoutEnabledAsync_GivenAUserAndATrueFlag_LockoutEnabledIsSetToTrue()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -28,11 +29,11 @@ namespace Identity.Dapper.IntegrationTests
                 UserName = "UserName",
                 IsAccountActive = true
             };
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            await userStore.SetLockoutEnabledAsync(userEntity, true);
+            await userStore.SetLockoutEnabledAsync(user, true);
 
-            var isLockedOut  = await userStore.GetLockoutEnabledAsync(userEntity);
+            var isLockedOut  = await userStore.GetLockoutEnabledAsync(user);
 
             isLockedOut.Should().BeTrue();
         }
@@ -41,9 +42,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void SetLockoutEndDateAsync_GivenAUserAndLockoutDate_LockoutDateIsSet()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -57,11 +58,11 @@ namespace Identity.Dapper.IntegrationTests
                 UserName = "UserName",
                 IsAccountActive = true
             };
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            await userStore.SetLockoutEndDateAsync(userEntity, Convert.ToDateTime("01/01/2014"));
+            await userStore.SetLockoutEndDateAsync(user, Convert.ToDateTime("01/01/2014"));
 
-            var lockoutDate = await userStore.GetLockoutEndDateAsync(userEntity);
+            var lockoutDate = await userStore.GetLockoutEndDateAsync(user);
 
             lockoutDate.Should().Be(Convert.ToDateTime("01/01/2014"));
         }
@@ -70,9 +71,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void IncrementAccessFailedCountAsync_GivenAUser_IncrementsAccessFailedCount()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -86,11 +87,11 @@ namespace Identity.Dapper.IntegrationTests
                 UserName = "UserName",
                 IsAccountActive = true
             };
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            await userStore.IncrementAccessFailedCountAsync(userEntity);
+            await userStore.IncrementAccessFailedCountAsync(user);
 
-            var failedCount = await userStore.GetAccessFailedCountAsync(userEntity);
+            var failedCount = await userStore.GetAccessFailedCountAsync(user);
 
             failedCount.Should().Be(1);
         }
@@ -99,9 +100,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void ResetAccessFailedCountAsync_GivenAUser_ResetsFailedCountToZero()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -115,13 +116,13 @@ namespace Identity.Dapper.IntegrationTests
                 UserName = "UserName",
                 IsAccountActive = true
             };
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            await userStore.IncrementAccessFailedCountAsync(userEntity);
+            await userStore.IncrementAccessFailedCountAsync(user);
 
-            await userStore.ResetAccessFailedCountAsync(userEntity);
+            await userStore.ResetAccessFailedCountAsync(user);
 
-            var failedCount = await userStore.GetAccessFailedCountAsync(userEntity);
+            var failedCount = await userStore.GetAccessFailedCountAsync(user);
 
             failedCount.Should().Be(0);
         }

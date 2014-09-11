@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
-using Identity.Dapper.Entities;
+using Identity.Dapper.Models;
+using Identity.Dapper.Stores;
 using NUnit.Framework;
 
 namespace Identity.Dapper.IntegrationTests
@@ -11,9 +12,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void SetEmailAsync_GivenAUserAndEmail_SetTheUsersEmail()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -28,11 +29,11 @@ namespace Identity.Dapper.IntegrationTests
                 IsAccountActive = true
             };
 
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            await userStore.SetEmailAsync(userEntity, "anotheremail@domain.com");
+            await userStore.SetEmailAsync(user, "anotheremail@domain.com");
 
-            var emailAddress  = await userStore.GetEmailAsync(userEntity);
+            var emailAddress  = await userStore.GetEmailAsync(user);
 
             emailAddress.Should().Be("anotheremail@domain.com");
         }
@@ -41,9 +42,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void SetEmailConfirmedAsync_GivenAUserAndATrueFlag_SetsTheEmailAsConfirmed()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = false,
@@ -58,11 +59,11 @@ namespace Identity.Dapper.IntegrationTests
                 IsAccountActive = true
             };
 
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            await userStore.SetEmailConfirmedAsync(userEntity, true);
+            await userStore.SetEmailConfirmedAsync(user, true);
 
-            var isEmailConfirmed = await userStore.GetEmailConfirmedAsync(userEntity);
+            var isEmailConfirmed = await userStore.GetEmailConfirmedAsync(user);
 
             isEmailConfirmed.Should().BeTrue();
         }
@@ -71,9 +72,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void FindByEmailAsync_GivenAnEmailAddress_ReturnsAUser()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "myname@domain.com",
                 IsEmailConfirmed = false,
@@ -88,11 +89,11 @@ namespace Identity.Dapper.IntegrationTests
                 IsAccountActive = true
             };
 
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            var user = await userStore.FindByEmailAsync("myname@domain.com");
+            var foundUser = await userStore.FindByEmailAsync("myname@domain.com");
 
-            user.Should().NotBeNull();
+            foundUser.Should().NotBeNull();
         }
 
         [TestFixtureTearDown]

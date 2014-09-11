@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using FluentAssertions;
-using Identity.Dapper.Entities;
+using Identity.Dapper.Models;
+using Identity.Dapper.Stores;
 using NUnit.Framework;
 
 namespace Identity.Dapper.IntegrationTests
@@ -11,32 +12,32 @@ namespace Identity.Dapper.IntegrationTests
         [TestFixtureSetUp]
         public async void SetUp()
         {
-            List<RoleEntity> roles = new List<RoleEntity>
+            List<Role> roles = new List<Role>
             {
-                new RoleEntity
+                new Role
                 {
                     Name = "Admin"
                 },
-                new RoleEntity
+                new Role
                 {
                     Name = "User"
                 },
-                new RoleEntity
+                new Role
                 {
                     Name = "Manager"
                 }
             };
 
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var store = new RoleEntityStore(applicationDatabaseConfiguration);
+            var store = new RoleStore(applicationDatabaseConfiguration);
 
-            var entities = await store.Get();
+            var entities = await store.GetRoles();
 
             if (entities.Count == 0)
             {
-                foreach (var roleEntity in roles)
+                foreach (var role in roles)
                 {
-                    await store.Insert(roleEntity);
+                    await store.Insert(role);
                 }
             }
         }
@@ -45,9 +46,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void AddToRoleAsync_GivenAUserAndRole_AddsTheUserToTheRole()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -62,11 +63,11 @@ namespace Identity.Dapper.IntegrationTests
                 IsAccountActive = true
             };
 
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            await userStore.AddToRoleAsync(userEntity, "Admin");
+            await userStore.AddToRoleAsync(user, "Admin");
 
-            var roles = await userStore.GetRolesAsync(userEntity);
+            var roles = await userStore.GetRolesAsync(user);
 
             roles.Should().HaveCount(1);
             roles[0].Should().Be("Admin");
@@ -76,9 +77,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void RemoveFromRoleAsync_GivenAUserAndRole_RemovesTheUserFromTheRole()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -93,13 +94,13 @@ namespace Identity.Dapper.IntegrationTests
                 IsAccountActive = true
             };
 
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            await userStore.AddToRoleAsync(userEntity, "User");
+            await userStore.AddToRoleAsync(user, "User");
 
-            await userStore.RemoveFromRoleAsync(userEntity, "User");
+            await userStore.RemoveFromRoleAsync(user, "User");
 
-            var roles = await userStore.GetRolesAsync(userEntity);
+            var roles = await userStore.GetRolesAsync(user);
 
             roles.Should().HaveCount(0);
         }
@@ -108,9 +109,9 @@ namespace Identity.Dapper.IntegrationTests
         public async void IsInRoleAsync_GivenAUserAndARole_ReturnsTrueIfUserIsInRole()
         {
             var applicationDatabaseConfiguration = new ApplicationDatabaseConfiguration();
-            var userStore = new UserStore<UserEntity>(applicationDatabaseConfiguration);
+            var userStore = new UserStore<User>(applicationDatabaseConfiguration);
 
-            var userEntity = new UserEntity
+            var user = new User
             {
                 Email = "someemail@domain.com",
                 IsEmailConfirmed = true,
@@ -125,11 +126,11 @@ namespace Identity.Dapper.IntegrationTests
                 IsAccountActive = true
             };
 
-            await userStore.CreateAsync(userEntity);
+            await userStore.CreateAsync(user);
 
-            await userStore.AddToRoleAsync(userEntity, "User");
+            await userStore.AddToRoleAsync(user, "User");
 
-            var isInRole  = await userStore.IsInRoleAsync(userEntity, "User");
+            var isInRole  = await userStore.IsInRoleAsync(user, "User");
 
             isInRole.Should().BeTrue();
         }
